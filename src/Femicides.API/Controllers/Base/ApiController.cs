@@ -9,26 +9,19 @@ namespace Femicides.API.Controllers
     public class ApiController : ControllerBase
     {
         public static readonly sbyte maxDataCountPerPage = 10;
-
         public FemicidesContext Context => (FemicidesContext)HttpContext?.RequestServices.GetService(typeof(FemicidesContext));
-        public MemoryCacheEntryOptions MemoryCacheExpOptions = new MemoryCacheEntryOptions
-        {
-            AbsoluteExpiration = System.DateTime.Now.AddDays(1),
-            Priority = CacheItemPriority.High
-        };
 
         [NonAction]
         public object Pagination(int count, int selectedPage, string queryString)
         {
             var totalPages = CalculateTotalPage(count);
             var requestHostPath = "https://" + Request.Host + Request.Path;
-
             var info = new
             {
                 count,
                 pages = totalPages,
-                next = requestHostPath.NextPage(totalPages,selectedPage,queryString),
-                prev = requestHostPath.PrevPage(totalPages,selectedPage,queryString)
+                next = requestHostPath.PaginateWithParams(totalPages,selectedPage,queryString,  1 ),
+                prev = requestHostPath.PaginateWithParams(totalPages,selectedPage,queryString, -1 )
             };
 
             return info;
